@@ -1,5 +1,5 @@
 {
-  "name": "infosites-serverless-js",
+  "name": "@infosites/infosites-serverless-js",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
