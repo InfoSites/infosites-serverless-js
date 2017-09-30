@@ -23,6 +23,14 @@ exports.error = function (payload) {
     return exports.send(500, payload)
 }
 
+exports.badRequest = function (payload) {
+    return exports.send(400, payload)
+}
+
+exports.forbidden = function () {
+    return exports.send(403)
+}
+
 exports.notFound = function () {
     return exports.send(404)
 }

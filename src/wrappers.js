@@ -5,19 +5,25 @@ var Promise = require('bluebird')
 var response = require('./response')
 
 module.exports = {
-	http: function (event, context, callback, service) {
+	http: function (event, context, callback, service, validator) {
+		if (validator === null) validator = function (body) { Promise.resolve(body) }
+
 		var body = event.body ? JSON.parse(event.body) : null
 		var params = event.pathParameters ? event.pathParameters : {}
 		if (event.headers && event.headers.hasOwnProperty('Accept-Language')) params.lang = event.headers['Accept-Language']
-		service(event.pathParameters, body).then(function (result) {
-			if (typeof(result) === "boolean") {
-				callback(null, result ? response.ok() : response.notFound())
-			} else {
-				callback(null, response.respond(result))
-			}
+		validator(body).then(function () {
+			service(event.pathParameters, body).then(function (result) {
+				if (typeof(result) === "boolean") {
+					callback(null, result ? response.ok() : response.notFound())
+				} else {
+					callback(null, response.respond(result))
+				}
+			}).catch(function (err) {
+				console.error(err)
+				callback(null, response.error(err))
+			})
 		}).catch(function (err) {
-			console.error(err)
-			callback(null, response.error(err))
+			callback(null, response.badRequest(err))
 		})
 	},
     sns: function (event, context, callback, service) {
