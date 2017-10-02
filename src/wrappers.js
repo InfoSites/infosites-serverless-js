@@ -6,7 +6,7 @@ var response = require('./response')
 
 module.exports = {
 	http: function (event, context, callback, service, validator) {
-		if (validator === null) validator = function (body) { Promise.resolve(body) }
+		if (!validator) validator = function (body) { return Promise.resolve(body) }
 
 		var body = event.body ? JSON.parse(event.body) : null
 		var params = event.pathParameters ? event.pathParameters : {}
