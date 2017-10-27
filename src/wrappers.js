@@ -1,6 +1,7 @@
 'use strict'
 
 var Promise = require('bluebird')
+var _ = require('lodash')
 
 var response = require('./response')
 var authorizer = require('./authorizer')
@@ -11,17 +12,20 @@ module.exports = {
 
 		if (!options) options = {}
 
+		var req = { headers: event.headers }
+
 		var token = (event.headers && event.headers.hasOwnProperty('Authorization')) ? event.headers['Authorization'].replace(/Bearer /g, '') : null
         var body = event.body ? JSON.parse(event.body) : null
-        var params = event.pathParameters ? event.pathParameters : {}
-        if (event.headers && event.headers.hasOwnProperty('Accept-Language')) params.lang = event.headers['Accept-Language']
+        var params = _.merge({}, event.pathParameters, event.queryStringParameters)
+        if (event.headers && event.headers.hasOwnProperty('Accept-Language')) req.lang = event.headers['Accept-Language']
 
         var validator = options.validator ? options.validator(body) : Promise.resolve(true)
 		var auth = options.authorize ? authorizer(token, options.authorize) : Promise.resolve(true)
 
-        auth.then(function () {
+        auth.then(function (user) {
+			req.user = user
             validator.then(function () {
-                service(params, body).then(function (result) {
+                service(req, params, body).then(function (result) {
                     if (typeof(result) === "boolean") {
                         callback(null, result ? response.ok() : response.notFound())
                     } else {

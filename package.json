@@ -9,6 +9,8 @@
   "author": "InfoSites <suporte@infosites.com.br> (http://www.infosites.com.br)",
   "license": "ISC",
   "dependencies": {
-    "bluebird": "^3.5.0"
+    "bluebird": "^3.5.0",
+    "jsonwebtoken": "^8.1.0",
+    "lodash": "^4.17.4"
   }
 }
