@@ -12,11 +12,11 @@ module.exports = function (token, scope) {
                     reject(err)
                 } else {
                     if (typeof(scope) === "boolean") {
-                        resolve()
+                        resolve(payload)
                     } else {
                         var scopes = payload.scopes
                         if (scopes && scopes.indexOf(scope) > -1) {
-                            resolve()
+                            resolve(payload)
                         } else {
                             reject()
                         }
