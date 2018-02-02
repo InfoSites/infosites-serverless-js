@@ -43,15 +43,18 @@ module.exports = {
         })
 	},
     sns: function (event, context, callback, service) {
+        context.callbackWaitsForEmptyEventLoop = false
+
         var all = []
-        for (var i in event.Records) {
-            var record = event.Records[i]
+
+        event.Records.forEach(record => {
             var body = JSON.parse(record.Sns.Message)
             all.push(service(body))
-        }
-        Promise.all(all).then(function () {
-            callback(null, 'ok')
-        }).catch(function (err) {
+        })
+
+        Promise.all(all).then(result => {
+            callback()
+        }).catch(err => {
             console.error(err)
             callback(err)
         })
