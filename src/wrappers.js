@@ -2,6 +2,7 @@
 
 var Promise = require('bluebird')
 var _ = require('lodash')
+var now = require('performance-now')
 
 var response = require('./response')
 var authorizer = require('./authorizer')
@@ -10,7 +11,16 @@ module.exports = {
 	http: function (event, context, callback, service, options) {
 	    context.callbackWaitsForEmptyEventLoop = false
 
-		if (!options) options = {}
+        var startTime = now()
+
+        var finish = function (err, resp) {
+            var endTime = now()
+            var elapsedTime = endTime - startTime
+            console.log(`Http request time: ${elapsedTime.toFixed(3)} ms\n`)
+            callback(err, resp)
+        }
+
+        if (!options) options = {}
 
 		var req = { headers: event.headers }
 
@@ -27,19 +37,19 @@ module.exports = {
             validator.then(function () {
                 service(req, params, body).then(function (result) {
                     if (typeof(result) === "boolean") {
-                        callback(null, result ? response.ok() : response.notFound())
+                        finish(null, result ? response.ok() : response.notFound())
                     } else {
-                        callback(null, response.respond(result))
+                        finish(null, response.respond(result))
                     }
                 }).catch(function (err) {
                     console.error(err)
-                    callback(null, response.error(err))
+                    finish(null, response.error(err))
                 })
             }).catch(function (err) {
-                callback(null, response.badRequest(err))
+                finish(null, response.badRequest(err))
             })
 		}).catch(function () {
-            callback(null, response.forbidden())
+            finish(null, response.forbidden())
         })
 	},
     sns: function (event, context, callback, service) {
